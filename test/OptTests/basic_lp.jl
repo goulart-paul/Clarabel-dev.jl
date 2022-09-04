@@ -75,6 +75,60 @@ end
 
             end
 
+            @testset "inf bounds" begin
+
+                P,c,A,b,cones = basic_LP_data(FloatT)
+                b .= typemax(FloatT)
+
+                solver = Clarabel.Solver(P,c,A,b,cones)
+                Clarabel.solve!(solver)
+
+                @test solver.solution.status == Clarabel.DUAL_INFEASIBLE
+
+            end
+
+            @testset "floatmax bounds" begin
+
+                P,c,A,b,cones = basic_LP_data(FloatT)
+                b .= floatmax(FloatT)
+
+                solver = Clarabel.Solver(P,c,A,b,cones)
+                Clarabel.solve!(solver)
+
+                @test solver.solution.status == Clarabel.DUAL_INFEASIBLE
+
+            end
+
+            @testset "inf bounds, primal infeasible" begin
+
+                P,c,A,b,cones = basic_LP_data(FloatT)
+                b .= floatmax(FloatT)
+                b[1] = -1
+                b[4] = -1
+
+                solver = Clarabel.Solver(P,c,A,b,cones)
+                Clarabel.solve!(solver)
+
+                @test solver.solution.status == Clarabel.DUAL_INFEASIBLE
+
+            end
+
+            @testset "inf bounds, (ill conditioned A)" begin
+
+                P,c,A,b,cones = basic_LP_data(FloatT)
+                b .= floatmax(FloatT)
+                A[1,1] = eps(FloatT)
+                A[4,1] = -eps(FloatT)
+
+                solver = Clarabel.Solver(P,c,A,b,cones)
+                Clarabel.solve!(solver)
+
+                @test solver.solution.status == Clarabel.DUAL_INFEASIBLE
+
+            end
+
+ 
+
         end      #end "Basic LP Tests (FloatT)"
     end
 end # UnitTestFloats
