@@ -172,19 +172,31 @@ end
 
 mutable struct ExponentialCone{T} <: AbstractCone{T}
 
-    H_dual::MMatrix{3,3,T,9}      #Hessian of the dual barrier at z 
-    Hs::MMatrix{3,3,T,9}          #scaling matrix
-    grad::MVector{3,T}        #gradient of the dual barrier at z 
-    z::MVector{3,T}           #holds copy of z at scaling point
+    H_dual::Matrix{T}     #Hessian of the dual barrier at z 
+    Hs::Matrix{T}          #scaling matrix
+    grad::Vector{T}         #gradient of the dual barrier at z 
+    z::Vector{T}            #holds copy of z at scaling point
+
+    #works (not optimized)
+    work_M1::Matrix{T} 
+    work_v1::Vector{T}
+    work_v2::Vector{T}
+    work_v3::Vector{T}
 
     function ExponentialCone{T}() where {T}
 
-        H_dual = @MMatrix zeros(T,3,3)
-        Hs     = @MMatrix zeros(T,3,3)
-        grad   = @MVector zeros(T,3)
-        z      = @MVector zeros(T,3)
+        H_dual = zeros(T,3,3)
+        Hs     = zeros(T,3,3)
+        grad   = zeros(T,3)
+        z      = zeros(T,3)
 
-        return new{T}(H_dual,Hs,grad,z)
+        work_M1 = zeros(T,3,3)
+        work_v1 = zeros(T,3)
+        work_v2 = zeros(T,3)
+        work_v3 = zeros(T,3)
+
+        return new{T}(H_dual,Hs,grad,z, 
+        work_M1, work_v1, work_v2, work_v3)
     end
 end
 
@@ -198,19 +210,32 @@ ExponentialCone(args...) = ExponentialCone{DefaultFloat}(args...)
 mutable struct PowerCone{T} <: AbstractCone{T}
 
     α::T
-    H_dual::MMatrix{3,3,T,9}      #Hessian of the dual barrier at z 
-    Hs::MMatrix{3,3,T,9}          #scaling matrix
-    grad::MVector{3,T}         #gradient of the dual barrier at z 
-    z::MVector{3,T}            #holds copy of z at scaling point
+    H_dual::Matrix{T}     #Hessian of the dual barrier at z 
+    Hs::Matrix{T}          #scaling matrix
+    grad::Vector{T}         #gradient of the dual barrier at z 
+    z::Vector{T}            #holds copy of z at scaling point
+
+    #works (not optimized)
+    work_M1::Matrix{T} 
+    work_v1::Vector{T}
+    work_v2::Vector{T}
+    work_v3::Vector{T}
 
     function PowerCone{T}(α::T) where {T}
 
-        H_dual = @MMatrix zeros(T,3,3)
-        Hs     = @MMatrix zeros(T,3,3)
-        grad   = @MVector zeros(T,3)
-        z      = @MVector zeros(T,3)
+        H_dual = zeros(T,3,3)
+        Hs     = zeros(T,3,3)
+        grad   = zeros(T,3)
+        z      = zeros(T,3)
 
-        return new{T}(α,H_dual,Hs,grad,z)
+        work_M1 = zeros(T,3,3)
+        work_v1 = zeros(T,3)
+        work_v2 = zeros(T,3)
+        work_v3 = zeros(T,3)
+
+
+        return new{T}(α,H_dual,Hs,grad,z, 
+        work_M1, work_v1, work_v2, work_v3)
     end
 end
 

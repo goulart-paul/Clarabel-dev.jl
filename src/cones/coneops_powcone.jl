@@ -122,7 +122,7 @@ function combined_ds_shift!(
     σμ::T
 ) where {T}
 
-    η = similar(K.grad) 
+    η = K.work_v3  #careful of clashing with work in higher_correction
     
     #3rd order correction requires input variables z
     _higher_correction!(K,η,step_s,step_z)     
@@ -161,7 +161,7 @@ function step_length(
 
     backtrack = settings.linesearch_backtrack_step
     αmin      = settings.min_terminate_step_length
-    work      = similar(K.grad)
+    work      = K.work_v1
 
     #need functions as closures to capture the power K.α
     #and use the same backtrack mechanism as the expcone
@@ -228,7 +228,7 @@ end
     # Primal barrier: f(s) = ⟨s,g(s)⟩ - f*(-g(s))
     # NB: ⟨s,g(s)⟩ = -3 = - ν
 
-    g = similar(K.grad)
+    g = K.work_v1
     α = K.α
 
     _gradient_primal(K,g,s,α)     #compute g(s)
@@ -376,11 +376,11 @@ function _higher_correction!(
 
     # u for H^{-1}*Δs
     H = K.H_dual
-    u = similar(K.z)
+    u = K.work_v1
     z = K.z
 
     #solve H*u = ds
-    cholH = similar(K.H_dual)
+    cholH = K.work_M1
     issuccess = cholesky_3x3_explicit_factor!(cholH,H)
     if issuccess 
         cholesky_3x3_explicit_solve!(u,cholH,ds)
@@ -416,7 +416,7 @@ function _higher_correction!(
     dotψu = dot(η,u)
     dotψv = dot(η,v)
 
-    Hψv = similar(K.grad)
+    Hψv = K.work_v1
     Hψv[1] = Hψ[1,1]*v[1]+Hψ[1,2]*v[2]
     Hψv[2] = Hψ[2,1]*v[1]+Hψ[2,2]*v[2]
     Hψv[3] = -2*v[3]
@@ -537,9 +537,9 @@ function _use_primal_dual_scaling(
     (Hs,H_dual) = (K.Hs,K.H_dual)
 
     st = K.grad
-    zt = similar(st)
-    δs = similar(st)
-    tmp = similar(st) #shared for δz, tmp, axis_z
+    zt = K.work_v1
+    δs = K.work_v2
+    tmp = K.work_v3 #shared for δz, tmp, axis_z
 
     # compute zt,st,μt locally
     # NB: zt,st have different sign convention wrt Mosek paper

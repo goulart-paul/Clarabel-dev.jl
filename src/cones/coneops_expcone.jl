@@ -120,7 +120,7 @@ function combined_ds_shift!(
     σμ::T
 ) where {T}
 
-    η = similar(K.grad)
+    η = K.work_v3  #careful of clashing with work in higher_correction
 
     #3rd order correction requires input variables z
     _higher_correction!(K,η,step_s,step_z)             
@@ -159,7 +159,7 @@ function step_length(
 
     backtrack = settings.linesearch_backtrack_step
     αmin      = settings.min_terminate_step_length
-    work      = similar(K.grad)
+    work      = K.work_v1
     
     αz = _step_length_3d_cone(work, dz, z, αmax, αmin,  backtrack, _is_dual_feasible_expcone)
     αs = _step_length_3d_cone(work, ds, s, αmax, αmin,  backtrack, _is_primal_feasible_expcone)
@@ -366,11 +366,11 @@ function _higher_correction!(
 
     # u for H^{-1}*Δs
     H = K.H_dual
-    u = similar(K.z)
+    u = K.work_v1
     z = K.z
  
     #solve H*u = ds
-    cholH = similar(K.H_dual)
+    cholH = K.work_M1
     issuccess = cholesky_3x3_explicit_factor!(cholH,H)
     if issuccess 
         cholesky_3x3_explicit_solve!(u,cholH,ds)
@@ -491,9 +491,9 @@ function _use_primal_dual_scaling(
     (Hs,H_dual) = (K.Hs,K.H_dual)
 
     st = K.grad
-    zt = similar(st)
-    δs = similar(st)
-    tmp = similar(st) #shared for δz, tmp, axis_z
+    zt = K.work_v1
+    δs = K.work_v2
+    tmp = K.work_v3 #shared for δz, tmp, axis_z
 
     # compute zt,st,μt locally
     # NB: zt,st have different sign convention wrt Mosek paper
