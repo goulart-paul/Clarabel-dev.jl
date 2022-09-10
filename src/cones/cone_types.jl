@@ -170,23 +170,21 @@ end
     isbitstype(T) ? MVector{3,T} : SizedVector{3,T,Vector{T}}
 end
 
-mutable struct ExponentialCone{T,M3T,V3T} <: AbstractCone{T}
+mutable struct ExponentialCone{T} <: AbstractCone{T}
 
-    H_dual::M3T      #Hessian of the dual barrier at z 
-    Hs::M3T          #scaling matrix
-    grad::V3T        #gradient of the dual barrier at z 
-    z::V3T           #holds copy of z at scaling point
+    H_dual::MMatrix{3,3,T,9}      #Hessian of the dual barrier at z 
+    Hs::MMatrix{3,3,T,9}          #scaling matrix
+    grad::MVector{3,T}        #gradient of the dual barrier at z 
+    z::MVector{3,T}           #holds copy of z at scaling point
 
     function ExponentialCone{T}() where {T}
 
-        M3T    = CONE3D_M3T_TYPE(T)
-        V3T    = CONE3D_V3T_TYPE(T)
-        H_dual = M3T(zeros(T,3,3))
-        Hs     = M3T(zeros(T,3,3))
-        grad   = V3T(zeros(T,3))
-        z      = V3T(zeros(T,3))
+        H_dual = @MMatrix zeros(T,3,3)
+        Hs     = @MMatrix zeros(T,3,3)
+        grad   = @MVector zeros(T,3)
+        z      = @MVector zeros(T,3)
 
-        return new{T,M3T,V3T}(H_dual,Hs,grad,z)
+        return new{T}(H_dual,Hs,grad,z)
     end
 end
 
@@ -197,24 +195,22 @@ ExponentialCone(args...) = ExponentialCone{DefaultFloat}(args...)
 # # ------------------------------------
 
 # gradient and Hessian for the dual barrier function
-mutable struct PowerCone{T,M3T,V3T} <: AbstractCone{T}
+mutable struct PowerCone{T} <: AbstractCone{T}
 
     α::T
-    H_dual::M3T      #Hessian of the dual barrier at z 
-    Hs::M3T          #scaling matrix
-    grad::V3T        #gradient of the dual barrier at z 
-    z::V3T           #holds copy of z at scaling point
+    H_dual::MMatrix{3,3,T,9}      #Hessian of the dual barrier at z 
+    Hs::MMatrix{3,3,T,9}          #scaling matrix
+    grad::MVector{3,T}         #gradient of the dual barrier at z 
+    z::MVector{3,T}            #holds copy of z at scaling point
 
     function PowerCone{T}(α::T) where {T}
 
-        M3T    = CONE3D_M3T_TYPE(T)
-        V3T    = CONE3D_V3T_TYPE(T)
-        H_dual = M3T(zeros(T,3,3))
-        Hs     = M3T(zeros(T,3,3))
-        grad   = V3T(zeros(T,3))
-        z      = V3T(zeros(T,3))
+        H_dual = @MMatrix zeros(T,3,3)
+        Hs     = @MMatrix zeros(T,3,3)
+        grad   = @MVector zeros(T,3)
+        z      = @MVector zeros(T,3)
 
-        return new{T,M3T,V3T}(α,H_dual,Hs,grad,z)
+        return new{T}(α,H_dual,Hs,grad,z)
     end
 end
 

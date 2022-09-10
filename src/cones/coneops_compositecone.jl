@@ -20,14 +20,14 @@
 # and ExponentialCone  and PowerCone would no longer need hidden 
 #internal parameters with  outer-only constructors.
 
-# turns PowerCone{T} to PowerCone{T,M3T,V3T}
-function _make_conetype_concrete(::Type{PowerCone},T::Type) 
-    return PowerCone{T,CONE3D_M3T_TYPE(T),CONE3D_V3T_TYPE(T)}
-end
-# turns ExponentialCone{T} to ExponentialCone{T,M3T,V3T}
-function _make_conetype_concrete(::Type{ExponentialCone},T::Type) 
-    return ExponentialCone{T,CONE3D_M3T_TYPE(T),CONE3D_V3T_TYPE(T)}
-end
+# # turns PowerCone{T} to PowerCone{T,M3T,V3T}
+# function _make_conetype_concrete(::Type{PowerCone},T::Type) 
+#     return PowerCone{T,CONE3D_M3T_TYPE(T),CONE3D_V3T_TYPE(T)}
+# end
+# # turns ExponentialCone{T} to ExponentialCone{T,M3T,V3T}
+# function _make_conetype_concrete(::Type{ExponentialCone},T::Type) 
+#     return ExponentialCone{T,CONE3D_M3T_TYPE(T),CONE3D_V3T_TYPE(T)}
+# end
 # turns any other AbstractCone{T} to itself
 _make_conetype_concrete(conetype,T::Type) = conetype{T}
 
@@ -39,7 +39,7 @@ function _conedispatch(x, call)
     # switchyard we construct here, but would also prevent 
     # the use of nested CompositeCones.  
     thetypes = collect(values(ConeDict))
-    foldr((t, tail) -> :(if $x isa _make_conetype_concrete($t,T); $call else $tail end), thetypes, init=Expr(:block))
+    foldr((t, tail) -> :(if $x isa $t; $call else $tail end), thetypes, init=Expr(:block))
 end
 
 macro conedispatch(call)
